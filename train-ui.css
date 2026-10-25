@@ -1,0 +1,55 @@
+body { background: #0a1422; color: #e8eef8; }
+main { max-width: 660px; padding: 18px 12px 32px; }
+header { top: 0; bottom: auto; border-top: 0; border-bottom: 1px solid #24354a; background: #0d1b2dee; backdrop-filter: blur(16px); padding: 18px max(16px, calc((100vw - 636px)/2)); gap: 12px; }
+header h1 { font-size: 1.15rem; font-weight: 700; letter-spacing: .04em; }
+header h1 small { font-size: .68rem; margin-top: 4px; font-weight: 400; }
+.line-color-bar { background: #1488ff; width: 5px; height: 36px; }
+.status-bar { gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.refresh-btn { background: #16273c; border-color: #30435c; border-radius: 24px; color: #e0eafa; padding: 8px 14px; }
+.diagram-wrapper { background: linear-gradient(140deg,#101f32,#0b1727); border-color: #22344b; border-radius: 18px; padding: 20px 0; overflow-x: auto; }
+.station-row { grid-template-columns: 108px 32px 1fr; min-height: 64px; min-width: var(--diagram-width, 310px); }
+.station-name { font-size: .82rem; font-weight: 600; color: #e3ebf8; padding-right: 10px; }
+.station-row.highlight { background: rgba(52,211,153,.10); border: 0; box-shadow: inset 3px 0 #34d399, inset 0 1px #34d39944, inset 0 -1px #34d39944; }
+.station-row.highlight .station-name { color: #6ee7b7; font-weight: 700; }
+.station-row.highlight .station-dot { background: #34d399; outline-color: #34d399; }
+.station-dot { background: #1688ff; border: 3px solid #ddecff; outline: 3px solid #1688ff; width: 12px; height: 12px; }
+.line-seg-top,.line-seg-bottom { background: #1688ff; width: 4px; }
+.lane { height: 64px; }
+.train-badge,.train-badge.car-6,.train-badge.car-8,.train-badge.car-unknown { position: absolute; top: 50%; display: inline-flex; align-items: center; gap: 7px; width: 152px; height: 32px; padding: 0 4px; border: 0; background: transparent; border-radius: 6px; font: inherit; font-size: .7rem; font-weight: 600; text-align: left; color: #e4edf9; }
+.train-badge.at-station { transform: translateY(-50%); }
+.train-badge.between { transform: translateY(calc(-50% + 32px)); }
+.train-badge:hover { background: #ffffff08; }
+.train-badge.at-station:hover { transform: translateY(-50%); }
+.train-badge.between:hover { transform: translateY(calc(-50% + 32px)); }
+.train-badge:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.train-shape { display: inline-flex; align-items: center; flex-shrink: 0; color: #0079c2; height: 20px; }
+.train-icon { display: block; flex-shrink: 0; }
+.car-8 .train-shape { color: #0079c2; }
+.train-badge .destination { position: absolute; left: 4px; bottom: calc(50% + 12px); color: #93a6bc; font-size: .6rem; font-weight: 400; line-height: 12px; white-space: nowrap; }
+.train-badge .delay-value { margin-left: -3px; font-size: .78rem; }
+.train-badge.delay-small,.train-badge.delay-small .train-shape,.detail-delay.delay-small,.detail-train.delay-small .train-shape { color: #ffda42; background: transparent; }
+.train-badge.delay-large,.train-badge.delay-large .train-shape,.detail-delay.delay-large,.detail-train.delay-large .train-shape { color: #ff5c6d; background: transparent; }
+.train-unknown { width: 47px; height: 12px; border: 1px dashed #92a3b7; border-radius: 3px; color: #aebdd0; font-size: 10px; line-height: 10px; text-align: center; }
+.popup-overlay { background: #02071299; backdrop-filter: blur(4px); }
+.popup { background: linear-gradient(140deg,#1c2c43,#101d30); border: 1px solid #40526b; border-radius: 22px; padding: 28px; width: 360px; min-width: 0; max-width: calc(100vw - 24px); box-shadow: 0 24px 80px #0009; }
+.popup-title { color: #aebed4; font-size: .8rem; font-weight: 400; margin-bottom: 14px; }
+.popup-type:empty { display: none; }
+.popup-close { top: 13px; right: 14px; width: 32px; height: 32px; color: #b8c8df; border-radius: 50%; font-size: 1.05rem; }
+.popup-close:hover,.popup-close:focus-visible { background: #ffffff12; color: white; }
+.detail-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.detail-heading h2 { font-size: .95rem; font-weight: 500; color: #a8b9ce; letter-spacing: .02em; }
+.detail-delay { font-size: 1.3rem; font-weight: 700; white-space: nowrap; }
+.detail-delay.delay-0 { font-size: .75rem; color: #8fa6bd; }
+.detail-train { padding: 12px 0 28px; }
+.position-caption { font-size: .65rem; letter-spacing: .12em; color: #91a6bf; margin-bottom: 9px; }
+.detail-position { display: flex; gap: 12px; align-items: center; font-size: 1rem; font-weight: 600; padding-bottom: 24px; }
+.position-arrow { color: #429eff; }
+.stopped-label { color: #8fa6bd; font-size: .72rem; font-weight: 400; }
+.detail-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid #35465f; padding-top: 16px; font-size: .6rem; color: #9bafc8; }
+@media(max-width:600px) { .popup { left: 8px !important; right: 8px; top: auto !important; bottom: 8px; width: auto; max-width: none; padding: 30px 24px max(24px,env(safe-area-inset-bottom)); border-radius: 24px; } .popup::before { content: ''; position: absolute; top: 10px; left: calc(50% - 20px); width: 40px; height: 4px; background: #7487a2; border-radius: 4px; } header h1 { font-size: 1rem; } }
+@media(prefers-reduced-motion:reduce) { * { animation: none !important; transition: none !important; } }
+.train-badge { z-index: 10; cursor: pointer; scroll-margin-top: 110px; }
+
+/* Delay uses the whole body so it cannot be confused with the blue service color. */
+.delay-small .train-body,.delay-large .train-body { fill: currentColor; }
+.delay-small .train-windows,.delay-large .train-windows { fill: #0b1a2b; }

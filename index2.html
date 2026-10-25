@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>都営三田線 列車運行位置</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Meiryo", sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #1a1d27;
+      border-top: 2px solid #0079C2;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      bottom: 0;
+      z-index: 100;
+    }
+
+    .header-left { display: flex; align-items: center; gap: 12px; }
+
+    .line-color-bar {
+      width: 6px;
+      height: 32px;
+      background: #0079C2;
+      border-radius: 3px;
+    }
+
+    header h1 {
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: #f0f4ff;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: #8892b0;
+    }
+
+    .holiday-warn {
+      font-size: 0.75rem;
+      color: #f87171;
+      border: 1px solid #f87171;
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: pulse 2s infinite;
+    }
+
+    .status-dot.loading { background: #facc15; animation: none; }
+    .status-dot.error   { background: #f87171; animation: none; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .refresh-btn {
+      background: #2d3148;
+      border: 1px solid #3d4268;
+      color: #a0aec0;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .refresh-btn:hover { background: #3d4268; color: #e2e8f0; }
+
+    main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 4px 20px;
+    }
+
+    .error-banner {
+      background: #2d1010;
+      border: 1px solid #7f1d1d;
+      color: #f87171;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 0.85rem;
+    }
+
+    /* === Route Diagram === */
+    .diagram-wrapper {
+      background: #1a1d27;
+      border: 1px solid #2d3148;
+      border-radius: 12px;
+      padding: 20px 0;
+      overflow: hidden;
+    }
+
+    /* Each station row */
+    .station-row {
+      display: grid;
+      grid-template-columns: 130px 36px 1fr;
+      align-items: center;
+      min-height: 52px;
+      position: relative;
+    }
+
+
+    .station-row.highlight {
+      background: rgba(52, 211, 153, 0.08);
+      border-top: 1px solid rgba(52, 211, 153, 0.3);
+      border-bottom: 1px solid rgba(52, 211, 153, 0.3);
+      border-radius: 6px;
+    }
+
+    .station-row.highlight .station-name {
+      color: #6ee7b7;
+      font-weight: 600;
+    }
+
+    .station-name {
+      text-align: right;
+      padding-right: 8px;
+      font-size: 0.82rem;
+      color: #c8d3f5;
+      line-height: 1.2;
+    }
+
+    /* Center track column */
+    .track-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      height: 100%;
+    }
+
+    .line-seg-top {
+      width: 4px;
+      background: #0079C2;
+      flex: 1;
+    }
+
+    .station-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #0079C2;
+      border: 3px solid #1a1d27;
+      outline: 2px solid #0079C2;
+      z-index: 1;
+      flex-shrink: 0;
+    }
+
+    .line-seg-bottom {
+      width: 4px;
+      background: #0079C2;
+      flex: 1;
+    }
+
+    /* Train lanes */
+    .lane {
+      position: relative;
+      height: 52px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Popup */
+    .popup-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: none;
+    }
+
+    .popup-overlay.active { display: block; }
+
+    .popup {
+      position: fixed;
+      background: #1e2235;
+      border: 1px solid #3d4268;
+      border-radius: 10px;
+      padding: 16px 18px;
+      min-width: 220px;
+      max-width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      z-index: 201;
+    }
+
+    .popup-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #f0f4ff;
+      margin-bottom: 4px;
+    }
+
+    .popup-type {
+      font-size: 0.72rem;
+      color: #8892b0;
+      margin-bottom: 10px;
+    }
+
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 4px 0;
+      border-bottom: 1px solid #2d3148;
+      color: #c8d3f5;
+    }
+
+    .popup-row:last-child { border-bottom: none; }
+
+    .popup-row .label { color: #6b7280; }
+
+    .popup-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      color: #6b7280;
+      font-size: 1.1rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .popup-close:hover { color: #e2e8f0; }
+  </style>
+  <link rel="stylesheet" href="train-ui.css?v=4">
+</head>
+<body>
+<header>
+  <div class="header-left">
+    <div class="line-color-bar"></div>
+    <h1>三田線<small>西高島平</small></h1>
+  </div>
+  <div class="status-bar">
+    <div class="status-dot" id="statusDot"></div>
+    <button class="refresh-btn" onclick="fetchTrains()">更新</button>
+    <span class="holiday-warn" id="holidayWarn" style="display:none">祝日非対応</span>
+  </div>
+</header>
+
+<main>
+  <div id="errorBanner" class="error-banner" style="display:none"></div>
+  <div id="content"></div>
+</main>
+
+
+
+<!-- Popup -->
+<div class="popup-overlay" id="popupOverlay" onclick="closePopup(event)">
+  <div class="popup" id="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+    <button class="popup-close" aria-label="閉じる" onclick="closePopup()">✕</button>
+    <div class="popup-title" id="popupTitle"></div>
+    <div class="popup-type" id="popupType"></div>
+    <div id="popupRows"></div>
+  </div>
+</div>
+
+<script src="train-number-rules.js"></script>
+<script src="train-ui.js?v=4"></script>
+<script>
+const API_URL = 'https://api-public.odpt.org/api/v4/odpt:Train?odpt:railway=odpt.Railway:Toei.Mita';
+const REFRESH_INTERVAL = 30;
+
+// 御成門→蓮根（下り＝西高島平方面）の順
+const STATIONS = [
+  { suffix: 'Mita',                 ja: '三田' },
+  { suffix: 'Shibakoen',            ja: '芝公園' },
+  { suffix: 'Onarimon',             ja: '御成門' },
+  { suffix: 'Uchisaiwaicho',        ja: '内幸町' },
+  { suffix: 'Hibiya',               ja: '日比谷' },
+  { suffix: 'Otemachi',             ja: '大手町' },
+  { suffix: 'Jimbocho',             ja: '神保町' },
+  { suffix: 'Suidobashi',           ja: '水道橋' },
+  { suffix: 'Kasuga',               ja: '春日' },
+  { suffix: 'Hakusan',              ja: '白山' },
+  { suffix: 'Sengoku',              ja: '千石' },
+  { suffix: 'Sugamo',               ja: '巣鴨' },
+  { suffix: 'NishiSugamo',          ja: '西巣鴨' },
+  { suffix: 'ShinItabashi',         ja: '新板橋' },
+  { suffix: 'ItabashiKuyakushomae', ja: '板橋区役所前' },
+  { suffix: 'ItabashiHoncho',       ja: '板橋本町' },
+  { suffix: 'Motohasunuma',         ja: '本蓮沼' },
+  { suffix: 'ShimuraSakaue',        ja: '志村坂上' },
+  { suffix: 'ShimuraSanchome',      ja: '志村三丁目' },
+  { suffix: 'Hasune',               ja: '蓮根' },
+];
+
+const STATION_INDEX = {};
+STATIONS.forEach((s, i) => { STATION_INDEX[s.suffix.toLowerCase()] = i; });
+
+const EXTRA_STATION_NAMES = {
+  'Meguro':               '目黒',
+  'Fudoumae':             '不動前',
+  'Musashikoyama':        '武蔵小山',
+  'Nishikoyama':          '西小山',
+  'Ookayama':             '大岡山',
+  'Jiyugaoka':            '自由が丘',
+  'Midorigaoka':          '緑が丘',
+  'Kuhombutsu':           '九品仏',
+  'YukigayaOtsuka':       '雪が谷大塚',
+  'Hiyoshi':              '日吉',
+  'Musashikosugi':        '武蔵小杉',
+  'MusashiKosugi':        '武蔵小杉',
+  'ShinMaruko':           '新丸子',
+  'Tamagawa':             '多摩川',
+  'Kamata':               '蒲田',
+  'Ikegami':              '池上',
+  'Togoshi':              '戸越',
+  'Hatanodai':            '旗の台',
+  'Mizonokuchi':          '溝の口',
+  'Saginuma':             '鷺沼',
+  'TamaPlaza':            'たまプラーザ',
+  'Azamino':              'あざみ野',
+  'ShinYurigaoka':        '新百合ヶ丘',
+  'Nagayama':             '永山',
+  'TamaCenter':           '多摩センター',
+  'Karakida':             '唐木田',
+  'ShirokaneTakanawa':    '白金高輪',
+  'Shirokanedai':         '白金台',
+  'Nishiya':              '西谷',
+  'Motosumiyoshi':        '元住吉',
+  'Kikuna':               '菊名',
+  'ShinYokohama':         '新横浜',
+  'Tsunashima':           '綱島',
+  'Okurayama':            '大倉山',
+  'Hiratsuka':            '平塚',
+  'HonAtsugi':            '本厚木',
+  'Isehara':              '伊勢原',
+  'Hadano':               '秦野',
+  'Shibusawa':            '渋沢',
+  'ShinMatsuda':          '新松田',
+  'Odawara':              '小田原',
+  'Fujisawa':             '藤沢',
+  'Chigasaki':            '茅ヶ崎',
+  'Totsuka':              '戸塚',
+  'Ofuna':                '大船',
+  'Yokohama':             '横浜',
+  'Kawasaki':             '川崎',
+  'Ebina':                '海老名',
+  'Yamato':               '大和',
+  'Shonandai':            '湘南台',
+  'Shibakoen':            '芝公園',
+  'Mita':                 '三田',
+  'NishiTakashimadaira':  '西高島平',
+  'ShinTakashimadaira':   '新高島平',
+  'Takashimadaira':       '高島平',
+  'Nishidai':             '西台',
+};
+
+const TRAIN_TYPES = {
+  'Toei.Local':          '各駅停車',
+  'Toei.Express':        '急行',
+  'Toei.LimitedExpress': '特急',
+  'Toei.SemiExpress':    '準急',
+  'Toei.AccessExpress':  'アクセス特急',
+  'Toei.Rapid':          '快速',
+  'Toei.RapidExpress':   '快速急行',
+};
+
+const DIRECTIONS = {
+  'Outbound':  '下り（西高島平方面）',
+  'Inbound':   '上り（大手町方面）',
+  'Northbound':'下り（西高島平方面）',
+  'Southbound':'上り（大手町方面）',
+};
+
+let countdownVal = REFRESH_INTERVAL;
+let countdownTimer = null;
+let currentTrains = [];
+async function fetchHolidays() {
+  const availability = await loadTrainFormations();
+  if (!availability.holidaysAvailable) document.getElementById('holidayWarn').style.display = '';
+}
+
+function extractSuffix(uri) {
+  if (!uri) return null;
+  const id = uri.split(':').pop();
+  const parts = id.split('.');
+  return parts[parts.length - 1];
+}
+
+function extractTrainType(uri) {
+  if (!uri) return null;
+  const id = uri.split(':').pop();
+  return TRAIN_TYPES[id] || id;
+}
+
+function extractDirection(uri) {
+  if (!uri) return null;
+  const last = uri.split(':').pop();
+  return DIRECTIONS[last] || last;
+}
+
+function stationName(uri) {
+  const suffix = extractSuffix(uri);
+  if (!suffix) return null;
+  const lower = suffix.toLowerCase();
+  const found = STATIONS.find(s => s.suffix.toLowerCase() === lower);
+  if (found) return found.ja;
+  const extraKey = Object.keys(EXTRA_STATION_NAMES).find(k => k.toLowerCase() === lower);
+  if (extraKey) return EXTRA_STATION_NAMES[extraKey];
+  return suffix;
+}
+
+function delayInfo(sec) {
+  if (!sec || sec <= 0) return { text: '定刻', cls: 'delay-0' };
+  const min = Math.max(1, Math.round(sec / 60));
+  if (min < 5) return { text: `+${min}`, cls: 'delay-small' };
+  return { text: `+${min}`, cls: 'delay-large' };
+}
+
+function formatTime(isoStr) {
+  if (!isoStr) return '';
+  return new Date(isoStr).toLocaleTimeString('ja-JP', {
+    timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+
+function trainPosition(t) {
+  const fromSuffix = extractSuffix(t['odpt:fromStation']);
+  const toSuffix   = extractSuffix(t['odpt:toStation']);
+
+  const fromIdx = fromSuffix != null ? STATION_INDEX[fromSuffix.toLowerCase()] : undefined;
+  const toIdx   = toSuffix   != null ? STATION_INDEX[toSuffix.toLowerCase()]   : undefined;
+
+  if (toIdx !== undefined) {
+    if (fromIdx !== undefined && Math.abs(toIdx - fromIdx) === 1) {
+      return { stationIdx: Math.min(fromIdx, toIdx), isBetween: true };
+    }
+    return { stationIdx: toIdx, isBetween: false };
+  }
+
+  if (fromIdx !== undefined) {
+    return { stationIdx: fromIdx, isBetween: false };
+  }
+
+  return null;
+}
+
+// Northbound（西高島平方面）のみ表示
+function getVisibleTrains(trains) {
+  const result = [];
+  for (const t of trains) {
+    if (!(t['odpt:railDirection'] || '').endsWith('Northbound')) continue;
+    const pos = trainPosition(t);
+    if (pos === null) continue;
+    result.push({ train: t, pos });
+  }
+  return result;
+}
+
+function openPopup(trainData, anchorEl) {
+  trainUI.open(trainData, anchorEl);
+}
+
+function closePopup(event) {
+  if (event && event.target !== document.getElementById('popupOverlay')) return;
+  const overlay = document.getElementById('popupOverlay');
+  overlay.classList.remove('active');
+  const returnTarget = Array.from(document.querySelectorAll('.train-badge')).find(el => el.dataset.train === overlay.dataset.returnTrain);
+  if (returnTarget) returnTarget.focus({ preventScroll: true });
+}
+
+function renderDiagram(trains) {
+  const mitaTrains = trains.filter(t => {
+    const railway = t['odpt:railway'] || '';
+    return railway.includes('Toei.Mita');
+  });
+
+  const visible = getVisibleTrains(mitaTrains);
+
+  const stationTrains = STATIONS.map(() => []);
+  for (const entry of visible) {
+    stationTrains[entry.pos.stationIdx].push(entry);
+  }
+
+  const maxLane = Math.max(1, ...stationTrains.map(entries => Math.max(
+    entries.filter(e => e.pos.isBetween).length, entries.filter(e => !e.pos.isBetween).length)));
+  let html = `<div class="diagram-wrapper" style="--diagram-width:${140 + maxLane * 158}px">`;
+
+  for (let i = 0; i < STATIONS.length; i++) {
+    const st = STATIONS[i];
+    const isLast = i === STATIONS.length - 1;
+    const rowTrains = stationTrains[i];
+
+    function renderBadges(entries) {
+      const counts = { station: 0, between: 0 };
+      return entries.map(entry => {
+        const key = entry.pos.isBetween ? 'between' : 'station';
+        return trainUI.badge(entry.train, entry.pos.isBetween, counts[key]++);
+      }).join('');
+    }
+
+    html += `
+      <div class="station-row${st.suffix === 'Otemachi' ? ' highlight' : ''}">
+        <div class="station-name">${st.ja}</div>
+        <div class="track-col">
+          <div class="line-seg-top" style="${i === 0 ? 'background:transparent' : ''}"></div>
+          <div class="station-dot"></div>
+          <div class="line-seg-bottom" style="${isLast ? 'background:transparent' : ''}"></div>
+        </div>
+        <div class="lane">
+          ${renderBadges(rowTrains)}
+        </div>
+      </div>
+    `;
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function showTrainPopup(trainNumber, el, event) {
+  const t = currentTrains.find(tr => tr['odpt:trainNumber'] === trainNumber);
+  if (!t) return;
+  openPopup(t, el);
+  if (event) event.stopPropagation();
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  dot.className = 'status-dot' + (state !== 'ok' ? ` ${state}` : '');
+}
+
+function startCountdown() {
+  countdownVal = REFRESH_INTERVAL;
+  clearInterval(countdownTimer);
+  countdownTimer = setInterval(() => {
+    countdownVal--;
+    if (countdownVal <= 0) {
+      clearInterval(countdownTimer);
+      fetchTrains();
+    }
+  }, 1000);
+}
+
+async function fetchTrains() {
+  setStatus('loading', '');
+  clearInterval(countdownTimer);
+
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    currentTrains = data;
+
+    document.getElementById('errorBanner').style.display = 'none';
+    document.getElementById('content').innerHTML = renderDiagram(data);
+
+    setStatus('ok', '');
+    startCountdown();
+  } catch (err) {
+    setStatus('error', '');
+    const banner = document.getElementById('errorBanner');
+    banner.style.display = 'block';
+    banner.textContent = `データの取得に失敗しました: ${err.message}`;
+    startCountdown();
+  }
+}
+
+fetchHolidays().then(() => fetchTrains());
+</script>
+</body>
+</html>
