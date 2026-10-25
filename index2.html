@@ -243,7 +243,7 @@
 
     .popup-close:hover { color: #e2e8f0; }
   </style>
-  <link rel="stylesheet" href="train-ui.css?v=4">
+  <link rel="stylesheet" href="train-ui.css?v=5">
 </head>
 <body>
 <header>
@@ -276,7 +276,7 @@
 </div>
 
 <script src="train-number-rules.js"></script>
-<script src="train-ui.js?v=4"></script>
+<script src="train-ui.js?v=5"></script>
 <script>
 const API_URL = 'https://api-public.odpt.org/api/v4/odpt:Train?odpt:railway=odpt.Railway:Toei.Mita';
 const REFRESH_INTERVAL = 30;
@@ -496,7 +496,7 @@ function renderDiagram(trains) {
 
   const maxLane = Math.max(1, ...stationTrains.map(entries => Math.max(
     entries.filter(e => e.pos.isBetween).length, entries.filter(e => !e.pos.isBetween).length)));
-  let html = `<div class="diagram-wrapper" style="--diagram-width:${140 + maxLane * 158}px">`;
+  let html = `<div class="diagram-wrapper" style="--lane-count:${maxLane};--diagram-width:${140 + maxLane * 158}px">`;
 
   for (let i = 0; i < STATIONS.length; i++) {
     const st = STATIONS[i];

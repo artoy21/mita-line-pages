@@ -53,3 +53,14 @@ header h1 small { font-size: .68rem; margin-top: 4px; font-weight: 400; }
 /* Delay uses the whole body so it cannot be confused with the blue service color. */
 .delay-small .train-body,.delay-large .train-body { fill: currentColor; }
 .delay-small .train-windows,.delay-large .train-windows { fill: #0b1a2b; }
+
+/* Share the available lane width rather than placing trains at fixed offsets. */
+.train-badge { left: calc(var(--train-index) * 100% / var(--lane-count, 1)); }
+@media (max-width: 600px) {
+  .station-row { grid-template-columns: 90px 24px 1fr; min-width: calc(114px + var(--lane-count, 1) * 88px); }
+  .station-name { font-size: .78rem; padding-right: 8px; }
+  .train-badge,.train-badge.car-6,.train-badge.car-8,.train-badge.car-unknown { width: calc(100% / var(--lane-count, 1)); padding: 0 4px; }
+  .train-badge .destination { max-width: calc(100% - 30px); overflow: hidden; text-overflow: ellipsis; }
+  .train-badge.delay-0 .destination { max-width: calc(100% - 8px); }
+  .train-badge .delay-value { position: absolute; right: 4px; bottom: calc(50% + 12px); font-size: .65rem; line-height: 12px; margin: 0; }
+}

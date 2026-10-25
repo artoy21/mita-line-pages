@@ -14,7 +14,7 @@
       const delay = delayInfo(t['odpt:delay']);
       const destination = stationName(t['odpt:destinationStation']?.[0]) || '?';
       const description = `列車 ${number}、${destination}、${trainFormationLabel(formation)}、${delay.text}`;
-      return `<button type="button" class="train-badge ${formation ? `car-${formation.cars}` : 'car-unknown'} ${delay.cls} ${between ? 'between' : 'at-station'}" style="left:${index * 158}px" data-train="${escape(number)}" onclick="showTrainPopup(this.dataset.train,this,event)" aria-label="${escape(description)}" title="${escape(`列車 ${number}、${destination}、${delay.text}`)}">${silhouette(formation)}<span class="destination">${escape(destination)}</span>${delay.cls === 'delay-0' ? '' : `<strong class="delay-value">${escape(delay.text)}</strong>`}</button>`;
+      return `<button type="button" class="train-badge ${formation ? `car-${formation.cars}` : 'car-unknown'} ${delay.cls} ${between ? 'between' : 'at-station'}" style="--train-index:${index}" data-train="${escape(number)}" onclick="showTrainPopup(this.dataset.train,this,event)" aria-label="${escape(description)}" title="${escape(`列車 ${number}、${destination}、${delay.text}`)}">${silhouette(formation)}<span class="destination">${escape(destination)}</span>${delay.cls === 'delay-0' ? '' : `<strong class="delay-value">${escape(delay.text)}</strong>`}</button>`;
     },
     open(t, anchor) {
       const number = t['odpt:trainNumber'] || '−';
