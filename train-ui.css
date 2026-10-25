@@ -54,13 +54,22 @@ header h1 small { font-size: .68rem; margin-top: 4px; font-weight: 400; }
 .delay-small .train-body,.delay-large .train-body { fill: currentColor; }
 .delay-small .train-windows,.delay-large .train-windows { fill: #0b1a2b; }
 
-/* Share the available lane width rather than placing trains at fixed offsets. */
-.train-badge { left: calc(var(--train-index) * 100% / var(--lane-count, 1)); }
+/* Pack each group by its visible contents, including delay, with a small fixed gap. */
+.station-row { min-width: 0; }
+.train-group { position: absolute; top: 50%; left: 0; display: flex; align-items: center; gap: 8px; width: max-content; }
+.train-group.at-station { transform: translateY(-50%); }
+.train-group.between { transform: translateY(calc(-50% + 32px)); }
+.train-group .train-badge { position: relative; top: auto; left: auto; width: auto; height: 32px; padding: 0 2px; gap: 3px; flex: 0 0 auto; }
+.train-group .train-badge.at-station,.train-group .train-badge.between,
+.train-group .train-badge.at-station:hover,.train-group .train-badge.between:hover { transform: none; }
+.train-badge .delay-value { position: static; font-size: .9rem; font-weight: 800; line-height: 1; margin: 0; }
+.train-badge .destination { left: 2px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 600px) {
-  .station-row { grid-template-columns: 90px 24px 1fr; min-width: calc(114px + var(--lane-count, 1) * 88px); }
+  .station-row { grid-template-columns: 82px 24px 1fr; }
   .station-name { font-size: .78rem; padding-right: 8px; }
-  .train-badge,.train-badge.car-6,.train-badge.car-8,.train-badge.car-unknown { width: calc(100% / var(--lane-count, 1)); padding: 0 4px; }
-  .train-badge .destination { max-width: calc(100% - 30px); overflow: hidden; text-overflow: ellipsis; }
-  .train-badge.delay-0 .destination { max-width: calc(100% - 8px); }
-  .train-badge .delay-value { position: absolute; right: 4px; bottom: calc(50% + 12px); font-size: .65rem; line-height: 12px; margin: 0; }
+}
+@media (max-width: 350px) {
+  .train-group { gap: 6px; }
+  .train-badge.car-6 .train-icon { width: 32px; }
+  .train-badge.car-8 .train-icon { width: 64px; }
 }

@@ -243,7 +243,7 @@
 
     .popup-close:hover { color: #e2e8f0; }
   </style>
-  <link rel="stylesheet" href="train-ui.css?v=5">
+  <link rel="stylesheet" href="train-ui.css?v=6">
 </head>
 <body>
 <header>
@@ -276,7 +276,7 @@
 </div>
 
 <script src="train-number-rules.js"></script>
-<script src="train-ui.js?v=5"></script>
+<script src="train-ui.js?v=6"></script>
 <script>
 const API_URL = 'https://api-public.odpt.org/api/v4/odpt:Train?odpt:railway=odpt.Railway:Toei.Mita';
 const REFRESH_INTERVAL = 30;
@@ -504,10 +504,10 @@ function renderDiagram(trains) {
     const rowTrains = stationTrains[i];
 
     function renderBadges(entries) {
-      const counts = { station: 0, between: 0 };
-      return entries.map(entry => {
-        const key = entry.pos.isBetween ? 'between' : 'station';
-        return trainUI.badge(entry.train, entry.pos.isBetween, counts[key]++);
+      return [false, true].map(between => {
+        const group = entries.filter(entry => entry.pos.isBetween === between);
+        if (!group.length) return '';
+        return `<div class="train-group ${between ? 'between' : 'at-station'}">${group.map((entry, index) => trainUI.badge(entry.train, between, index)).join('')}</div>`;
       }).join('');
     }
 
