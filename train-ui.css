@@ -73,3 +73,15 @@ header h1 small { font-size: .68rem; margin-top: 4px; font-weight: 400; }
   .train-badge.car-6 .train-icon { width: 32px; }
   .train-badge.car-8 .train-icon { width: 64px; }
 }
+
+/* Compact controls stay at the bottom; reserve space for the final station. */
+main { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+header { position: fixed; top: auto; bottom: 0; left: 0; right: 0; min-height: 38px; padding: 6px max(12px, calc((100vw - 636px)/2)); padding-bottom: calc(6px + env(safe-area-inset-bottom)); border-top: 1px solid #24354a; border-bottom: 0; gap: 8px; }
+.header-left { gap: 8px; }
+.line-color-bar { height: 18px; width: 3px; }
+header h1 { display: flex; align-items: baseline; gap: 8px; font-size: .8rem; font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+header h1 small { display: inline; font-size: .68rem; margin: 0; }
+.status-bar { flex-wrap: nowrap; gap: 8px; }
+.refresh-btn { padding: 4px 10px; font-size: .7rem; }
+.holiday-warn { font-size: .6rem; padding: 1px 3px; }
+.train-badge { scroll-margin-top: 12px; scroll-margin-bottom: 64px; }

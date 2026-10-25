@@ -243,13 +243,20 @@
 
     .popup-close:hover { color: #e2e8f0; }
   </style>
-  <link rel="stylesheet" href="train-ui.css?v=6">
+  <link rel="stylesheet" href="train-ui.css?v=7">
 </head>
 <body>
+
+
+<main>
+  <div id="errorBanner" class="error-banner" style="display:none"></div>
+  <div id="content"></div>
+</main>
+
 <header>
   <div class="header-left">
     <div class="line-color-bar"></div>
-    <h1>三田線<small>西高島平</small></h1>
+    <h1>三田線<small>西高島平方面</small></h1>
   </div>
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
@@ -257,11 +264,6 @@
     <span class="holiday-warn" id="holidayWarn" style="display:none">祝日非対応</span>
   </div>
 </header>
-
-<main>
-  <div id="errorBanner" class="error-banner" style="display:none"></div>
-  <div id="content"></div>
-</main>
 
 
 
