@@ -243,7 +243,7 @@
 
     .popup-close:hover { color: #e2e8f0; }
   </style>
-  <link rel="stylesheet" href="train-ui.css?v=7">
+  <link rel="stylesheet" href="train-ui.css?v=8">
 </head>
 <body>
 
@@ -256,7 +256,7 @@
 <header>
   <div class="header-left">
     <div class="line-color-bar"></div>
-    <h1>三田線<small>西高島平方面</small></h1>
+    <h1>三田線<small>西高島平方面</small><time id="lastUpdated" class="last-updated" aria-label="最終更新時刻">--:--:--</time></h1>
   </div>
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
@@ -542,6 +542,13 @@ function showTrainPopup(trainNumber, el, event) {
 function setStatus(state, text) {
   const dot = document.getElementById('statusDot');
   dot.className = 'status-dot' + (state !== 'ok' ? ` ${state}` : '');
+  if (state === 'ok') {
+    const now = new Date();
+    const updated = document.getElementById('lastUpdated');
+    updated.dateTime = now.toISOString();
+    updated.textContent = now.toLocaleTimeString('ja-JP', { timeZone: 'Asia/Tokyo', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    updated.title = '最終取得成功時刻（日本時間）';
+  }
 }
 
 function startCountdown() {
