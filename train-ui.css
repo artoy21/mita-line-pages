@@ -86,5 +86,5 @@ header h1 small { display: inline; font-size: .68rem; margin: 0; }
 .holiday-warn { font-size: .6rem; padding: 1px 3px; }
 .train-badge { scroll-margin-top: 12px; scroll-margin-bottom: 64px; }
 
-header .last-updated { font-size: .6rem; font-weight: 400; color: #9bafc8; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+header .last-updated { font-size: .8rem; font-weight: 600; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: 0; }
 @media (max-width: 350px) { header h1 { gap: 5px; } .header-left { gap: 5px; } }

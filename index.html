@@ -262,7 +262,7 @@
     .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
 
   </style>
-  <link rel="stylesheet" href="train-ui.css?v=8">
+  <link rel="stylesheet" href="train-ui.css?v=9">
 </head>
 <body>
 
@@ -275,10 +275,11 @@
 <header>
   <div class="header-left">
     <div class="line-color-bar"></div>
-    <h1>三田線<small>目黒方面</small><time id="lastUpdated" class="last-updated" aria-label="最終更新時刻">--:--:--</time></h1>
+    <h1>三田線<small>目黒方面</small></h1>
   </div>
   <div class="status-bar">
     <div class="status-dot" id="statusDot"></div>
+    <time id="lastUpdated" class="last-updated" aria-label="最終更新時刻">--:--:--</time>
     <button class="refresh-btn" onclick="fetchTrains()">更新</button>
     <span class="holiday-warn" id="holidayWarn" style="display:none">祝日非対応</span>
   </div>
